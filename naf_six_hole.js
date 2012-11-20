@@ -1,9 +1,10 @@
 //=============================================================================
 //
-//  Recorder fingering plugin
+//  6-hole Native American Flute fingering plugin
 //  http://musescore.org/en/project/naffingering
 //
-//  Copyright (C)2012 Nicolas Froment (lasconic)
+//  Copyright (C) 2012 lasconic
+//  additional development by Scott Scheiman
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License version 2.
@@ -21,17 +22,20 @@
 //
 // This is ECMAScript code (ECMA-262 aka "Java Script")
 //
-                   //F# G    G#   A    A#   B    C     C#   D    D#   E    F
-var fingerings = [ '1', '!', '2', '3', '#', '4', '$', '5',  '6', '^', '7', '&', 
-                   '8', '*', '9', '0',  "\u008C", ')', "\u0090", "\u0092", "\u0094", "\u0096"]
+                   // F#   G    G#   A    A#   B    C    C#    D    D#   E    F
+const fingerings = [ '1', '!', '2', '3', '#', '4', '$', '5',  '6', '^', '7', '~', 
+                     '8', '*', '9', '0', "\u008C"]
 
-var fontColor = new QColor("black");
-var fontSize = 30;
-var fontName = "NAFTracks Six Hole";
-var xOffset = 0;
-var yOffset = 5;
-var startPitch = 66; //F#
-var menuItem = "NAF Six Hole"
+const fontColor = new QColor("black");
+const errorColor = new QColor("red");
+//    errorColor.setAlpha(0); // uncomment this line if the "error" fingering is not wanted
+const errorFingering = '(';
+const fontSize = 30;
+const fontName = "NAFTracks Six Hole";
+const xOffset = 0;
+const yOffset = 5;
+const startPitch = 66; //F#
+const menuItem = "NAF Fingering (6 Hole)"
                                                         
 //---------------------------------------------------------
 //    init
@@ -56,15 +60,25 @@ function run()
       while (!cursor.eos()) {
             if (cursor.isChord()) {
                   
-                  var pitch = cursor.chord().topNote().pitch;
-                  var index = pitch - startPitch;
-                  if(index >= 0 && index < fingerings.length){ 
-                      var text  = new Text(curScore);
-                      text.text = fingerings[index];
+                  var topNote = cursor.chord().topNote();
+                  
+                  if (topNote.tied <= 1 ) {
+                      var text = new Text(curScore);
                       text.defaultFont = font;
-                      text.color = fontColor;
                       text.yOffset = xOffset;
                       text.yOffset = yOffset;
+
+                      var pitch = topNote.pitch;
+                      var index = pitch - startPitch;
+                      if (index >= 0 && index < fingerings.length) {
+                          text.color = fontColor;
+                          text.text  = fingerings[index];
+                          }
+                      else {
+                          text.color = errorColor;
+                          text.text  = errorFingering;
+                          }
+                      
                       cursor.putStaffText(text);
                       }
                   }
@@ -79,4 +93,3 @@ var mscorePlugin = {
       };
 
 mscorePlugin;
-
